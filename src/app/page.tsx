@@ -81,10 +81,11 @@ export default function HomePage() {
     <div className="bg-background text-foreground min-h-screen">
       {/* Header */}
       <AnimatedSection as="header" className="p-4 flex justify-between items-center max-w-7xl mx-auto absolute top-0 left-0 right-0 z-10 bg-transparent">
-            <div className="flex items-center gap-2">
-                <Layers className="h-7 w-7 text-primary" />
-                <span className="text-2xl font-bold font-headline">Leader</span>
-            </div>
+            <div className="flex items-center gap-3">
+          <Link href="/" className="mr-6 flex items-center space-x-2"> <img src='/images/TechezLogo.png' width={40}></img>
+            <span className="minecraftFont pt-2 text-2xl font-medium">TECHEZ</span>
+          </Link>
+      </div>
             <div>
             <Button asChild variant="ghost" className="mr-2">
                 <Link href="/login">Log In</Link>
