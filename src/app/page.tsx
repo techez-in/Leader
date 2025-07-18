@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { BarChart, Clock, MessageSquarePlus, Layers, Zap, Users, ShieldCheck } from 'lucide-react';
+import { BarChart, Clock, MessageSquarePlus, Layers, Zap, Users, ShieldCheck, Mail, Phone } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { useOnScreen } from '@/hooks/use-on-screen';
@@ -48,12 +48,12 @@ const AnimatedListItem = ({ icon: Icon, title, description, animationDelay = 0 }
 };
 
 
-const AnimatedSection = ({ children, className, animationDelay = 0 }: { children: React.ReactNode, className?: string, animationDelay?: number }) => {
+const AnimatedSection = ({ children, className, animationDelay = 0, as: Comp = 'div' }: { children: React.ReactNode, className?: string, animationDelay?: number, as?: React.ElementType }) => {
     const ref = useRef<HTMLDivElement>(null);
     const isVisible = useOnScreen(ref);
   
     return (
-      <div
+      <Comp
         ref={ref}
         className={cn(
           "transition-all duration-700",
@@ -63,7 +63,7 @@ const AnimatedSection = ({ children, className, animationDelay = 0 }: { children
         style={{ transitionDelay: `${animationDelay}ms` }}
       >
         {children}
-      </div>
+      </Comp>
     );
   };
 
@@ -80,13 +80,11 @@ export default function HomePage() {
   return (
     <div className="bg-background text-foreground min-h-screen">
       {/* Header */}
-      <AnimatedSection asChild>
-        <header className="p-4 flex justify-between items-center max-w-7xl mx-auto absolute top-0 left-0 right-0 z-10 bg-transparent">
-      <div className="flex items-center gap-3">
-          <Link href="/" className="mr-6 flex items-center space-x-2"> <img src='/images/TechezLogo.png' width={40}></img>
-            <span className="minecraftFont pt-2 text-2xl font-medium">TECHEZ</span>
-          </Link>
-      </div>
+      <AnimatedSection as="header" className="p-4 flex justify-between items-center max-w-7xl mx-auto absolute top-0 left-0 right-0 z-10 bg-transparent">
+            <div className="flex items-center gap-2">
+                <Layers className="h-7 w-7 text-primary" />
+                <span className="text-2xl font-bold font-headline">Leader</span>
+            </div>
             <div>
             <Button asChild variant="ghost" className="mr-2">
                 <Link href="/login">Log In</Link>
@@ -95,7 +93,6 @@ export default function HomePage() {
                 <Link href="/login">Try For Free</Link>
             </Button>
             </div>
-        </header>
       </AnimatedSection>
 
       <main>
@@ -103,7 +100,7 @@ export default function HomePage() {
         <section className="min-h-screen flex items-center justify-center text-center py-20 px-4">
           <AnimatedSection>
             <h1 className="text-5xl md:text-7xl font-bold font-headline mb-4 tracking-tighter" style={{fontWeight: 700}}>
-              YOUR LEADS, ONE POWERFUL SPACE
+              Your Leads, One Powerful Space
             </h1>
             <AnimatedSection animationDelay={200}>
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
@@ -216,6 +213,32 @@ export default function HomePage() {
             </AnimatedSection>
         </section>
 
+        {/* Contact Section */}
+        <section className="py-20 px-4">
+          <AnimatedSection className="text-center max-w-4xl mx-auto">
+            <h2 className="text-4xl font-bold font-headline mb-4">Get Your Own Leader</h2>
+            <p className="text-lg text-muted-foreground mb-8">
+              Contact us to get started with a personalized setup for your team.
+            </p>
+            <div className="flex flex-col md:flex-row justify-center items-center gap-8 text-lg">
+              <a href="mailto:contact.techez@gmail.com" className="flex items-center gap-3 text-foreground hover:text-primary transition-colors">
+                <Mail className="w-6 h-6 text-primary" />
+                <span>contact.techez@gmail.com</span>
+              </a>
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+                <a href="tel:+918320495754" className="flex items-center gap-3 text-foreground hover:text-primary transition-colors">
+                  <Phone className="w-6 h-6 text-primary" />
+                  <span>+91 83204 95754</span>
+                </a>
+                <a href="tel:+919313672805" className="flex items-center gap-3 text-foreground hover:text-primary transition-colors">
+                  <Phone className="w-6 h-6 text-primary" />
+                  <span>+91 93136 72805</span>
+                </a>
+              </div>
+            </div>
+          </AnimatedSection>
+        </section>
+
         {/* Final CTA Section */}
         <section className="py-20 px-4 bg-secondary">
           <AnimatedSection className="text-center max-w-2xl mx-auto">
@@ -233,10 +256,8 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <AnimatedSection asChild>
-        <footer className="text-center p-8 text-muted-foreground">
+      <AnimatedSection as="footer" className="text-center p-8 text-muted-foreground">
             <p>&copy; {new Date().getFullYear()} Techez Inc. All rights reserved.</p>
-        </footer>
       </AnimatedSection>
     </div>
   );
