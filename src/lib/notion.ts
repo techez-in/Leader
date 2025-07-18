@@ -71,6 +71,10 @@ const mapPageToLead = (page: PageObjectResponse): Lead | null => {
         const followUpDate = (followUpDateProp?.type === "date" && followUpDateProp.date?.start)
             ? new Date(followUpDateProp.date.start)
             : new Date();
+        
+        const userEmailProp = properties["User Email"];
+        const userEmail = (userEmailProp?.type === 'email' && userEmailProp.email) || undefined;
+
 
         return {
             id: page.id,
@@ -82,6 +86,7 @@ const mapPageToLead = (page: PageObjectResponse): Lead | null => {
             notes,
             dateAdded,
             followUpDate,
+            userEmail,
         };
     } catch(error) {
         console.error(`Failed to map page ${page.id} to lead:`, error);
@@ -89,10 +94,16 @@ const mapPageToLead = (page: PageObjectResponse): Lead | null => {
     }
 };
 
-export async function getLeads(): Promise<Lead[]> {
+export async function getLeads(userEmail: string): Promise<Lead[]> {
     try {
         const response: QueryDatabaseResponse = await notion.databases.query({
             database_id: databaseId,
+            filter: {
+                property: "User Email",
+                email: {
+                    equals: userEmail,
+                },
+            },
             sorts: [
                 {
                     property: 'Date Added',
@@ -118,12 +129,16 @@ function formatDateForNotion(date: Date): string {
     return adjustedDate.toISOString().split('T')[0];
 }
 
-export async function addLead(leadData: AddLeadFormValues): Promise<Lead | null> {
+export async function addLead(leadData: AddLeadFormValues, userEmail: string): Promise<Lead | null> {
     try {
         const properties: CreatePageParameters['properties'] = {
             "Name": {
                 type: "title",
                 title: [{ type: "text", text: { content: leadData.name } }],
+            },
+            "User Email": {
+                type: "email",
+                email: userEmail,
             },
              "Date Added": {
                 type: "date",
@@ -181,11 +196,11 @@ export async function addLead(leadData: AddLeadFormValues): Promise<Lead | null>
     }
 }
 
-export async function addLeadsBatch(leadsData: AddLeadFormValues[]): Promise<Lead[]> {
+export async function addLeadsBatch(leadsData: AddLeadFormValues[], userEmail: string): Promise<Lead[]> {
     const addedLeads: Lead[] = [];
     for (const leadData of leadsData) {
         try {
-            const newLead = await addLead(leadData);
+            const newLead = await addLead(leadData, userEmail);
             if (newLead) {
                 addedLeads.push(newLead);
             }
@@ -254,5 +269,3 @@ export async function deleteLead(pageId: string): Promise<string | null> {
         return null;
     }
 }
-
-    
