@@ -17,4 +17,5 @@ export interface Lead {
   status: LeadStatus;
   dateAdded: Date;
   followUpDate: Date;
+  userEmail?: string;
 }
