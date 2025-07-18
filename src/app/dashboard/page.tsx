@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -18,22 +19,30 @@ export default function DashboardPage() {
   const [isAddLeadOpen, setAddLeadOpen] = useState(false);
   const [isImportLeadOpen, setImportLeadOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (!user) {
+    const userString = localStorage.getItem('user');
+    if (!userString) {
       router.push('/login');
     } else {
-      fetchLeads();
+      const user = JSON.parse(userString);
+      setUserEmail(user.email);
     }
   }, [router]);
 
-  const fetchLeads = async () => {
+  useEffect(() => {
+    if (userEmail) {
+      fetchLeads(userEmail);
+    }
+  }, [userEmail]);
+
+  const fetchLeads = async (email: string) => {
     try {
       setIsLoading(true);
-      const notionLeads = await getLeads();
+      const notionLeads = await getLeads(email);
       setLeads(notionLeads);
     } catch (error) {
       console.error('Failed to fetch leads:', error);
@@ -48,8 +57,12 @@ export default function DashboardPage() {
   }
 
   const handleAddLead = async (newLeadData: AddLeadFormValues) => {
+    if (!userEmail) {
+        toast({ title: "Error", description: "You must be logged in to add a lead.", variant: "destructive" });
+        return;
+    }
     try {
-      const newLead = await addLead(newLeadData);
+      const newLead = await addLead(newLeadData, userEmail);
       if (newLead) {
         setLeads(prev => [newLead, ...prev]);
         toast({
@@ -66,11 +79,15 @@ export default function DashboardPage() {
         description: "Could not add lead to Notion. Please try again.",
         variant: "destructive",
       });
-      await fetchLeads();
+      if (userEmail) await fetchLeads(userEmail);
     }
   };
 
   const handleImportLeads = async (file: File): Promise<{ success: boolean; message: string }> => {
+    if (!userEmail) {
+        toast({ title: "Error", description: "You must be logged in to import leads.", variant: "destructive" });
+        return { success: false, message: "User not logged in." };
+    }
     try {
         const fileContent = await file.text();
         const parsedLeads = await parseLeadsFromCsv({ csvData: fileContent });
@@ -79,10 +96,10 @@ export default function DashboardPage() {
             return { success: false, message: "AI could not find any leads in the file." };
         }
 
-        const addedLeads = await addLeadsBatch(parsedLeads);
+        const addedLeads = await addLeadsBatch(parsedLeads, userEmail);
         
         if (addedLeads.length > 0) {
-            await fetchLeads(); // Refresh the entire list
+            if (userEmail) await fetchLeads(userEmail); // Refresh the entire list
             toast({
                 title: "Import Successful",
                 description: `${addedLeads.length} new leads have been imported.`,
